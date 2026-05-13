@@ -27,7 +27,7 @@ exports.createProduct = async (req, res) => {
         firstBlock.currentHash = generateHash(firstBlock);
 
         // QR CODE
-        const qrData = `http://localhost:3000/product/${productId}`;
+        const qrData = `https://krishichain-frontend.vercel.app/product/${productId}`;
         const qrCode = await QRCode.toDataURL(qrData);
 
         const product = await Product.create({
