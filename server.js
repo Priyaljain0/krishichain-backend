@@ -9,26 +9,27 @@ const productRoutes = require("./routes/productRoutes");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// ✅ CORS FIX (mobile issue solved)
+app.use(cors({
+    origin: "*",
+    credentials: true
+}));
 
+app.use(express.json());
 
 // ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
-
 
 // DATABASE CONNECTION
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch((err) => console.log(err));
 
-
 // TEST ROUTE
 app.get("/", (req, res) => {
     res.send("Backend Running");
 });
-
 
 const PORT = process.env.PORT || 5000;
 
