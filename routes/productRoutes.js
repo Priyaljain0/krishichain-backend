@@ -21,8 +21,11 @@ router.get(
     getAllProducts
 );
 
-router.get("/:id", getProduct);
-
+router.get(
+  "/:id",
+  auth,
+  getProduct
+);
 
 // PROTECTED ROUTES
 

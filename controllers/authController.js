@@ -8,7 +8,10 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
     try {
 
-        const { name, email, password, role } = req.body;
+        let { name, email, password, role } = req.body;
+
+        // ✅ FIX: normalize role
+        role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
         const existingUser = await User.findOne({ email });
 
@@ -35,17 +38,15 @@ exports.register = async (req, res) => {
 
     } catch (error) {
 
+        console.error("REGISTER ERROR:", error); // ✅ ADD THIS
+
         res.status(500).json({
             success: false,
             message: error.message
         });
 
     }
-};
-
-
-
-// LOGIN
+};// LOGIN
 exports.login = async (req, res) => {
 
     try {

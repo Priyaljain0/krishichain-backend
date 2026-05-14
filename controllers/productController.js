@@ -15,7 +15,6 @@ exports.createProduct = async (req, res) => {
 
         const productId = "PROD-" + Date.now();
 
-        // FIRST BLOCK (GENESIS BLOCK)
         const firstBlock = {
             stage: "Farmer Created",
             updatedBy: farmerName,
@@ -26,7 +25,6 @@ exports.createProduct = async (req, res) => {
 
         firstBlock.currentHash = generateHash(firstBlock);
 
-        // QR CODE
         const qrData = `https://krishichain-frontend.vercel.app/product/${productId}`;
         const qrCode = await QRCode.toDataURL(qrData);
 
@@ -62,9 +60,6 @@ exports.createProduct = async (req, res) => {
 // ================= GET SINGLE PRODUCT =================
 exports.getProduct = async (req, res) => {
     try {
-        console.log("REQ PARAM ID:", req.params.id);
-        console.log("USER:", req.user);
-
         const product = await Product.findOne({
             productId: req.params.id.trim()
         });
@@ -76,7 +71,6 @@ exports.getProduct = async (req, res) => {
             });
         }
 
-        // 🔐 SAFE CHECK (IMPORTANT FIX)
         if (
             req.user &&
             req.user.role === "farmer" &&
@@ -94,7 +88,7 @@ exports.getProduct = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("GET PRODUCT ERROR:", error); // 🔥 THIS WILL SHOW REAL ERROR
+        console.error("GET PRODUCT ERROR:", error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -102,19 +96,18 @@ exports.getProduct = async (req, res) => {
     }
 };
 
+
 // ================= GET ALL PRODUCTS =================
 exports.getAllProducts = async (req, res) => {
     try {
         let products;
 
         if (req.user.role === "farmer") {
-            // Farmer sees only own products
             products = await Product.find({
                 createdBy: req.user.id
             }).sort({ createdAt: -1 });
 
         } else {
-            // Others see ALL products
             products = await Product.find()
                 .sort({ createdAt: -1 });
         }
@@ -161,6 +154,43 @@ exports.updateStage = async (req, res) => {
             return res.status(403).json({
                 success: false,
                 message: "Farmer cannot update stage"
+            });
+        }
+
+        // ✅ CURRENT STAGE FIX
+        let currentStage = product.currentStage;
+
+        if (currentStage === "Farmer Created") {
+            currentStage = "Farmer";
+        }
+
+        // ✅ FLOW CONTROL (STRICT ORDER)
+        const flow = {
+            Farmer: "Warehouse",
+            Warehouse: "Distributor",
+            Distributor: "Retailer"
+        };
+
+        const expectedNextStage = flow[currentStage];
+
+        if (stage !== expectedNextStage) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid stage. Next allowed: ${expectedNextStage}`
+            });
+        }
+
+        // ✅ ROLE CONTROL
+        const roleStageMap = {
+            warehouse: "Warehouse",
+            distributor: "Distributor",
+            retailer: "Retailer"
+        };
+
+        if (roleStageMap[req.user.role] !== stage) {
+            return res.status(403).json({
+                success: false,
+                message: "You can only update your own stage"
             });
         }
 
