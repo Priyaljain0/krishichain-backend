@@ -11,8 +11,7 @@ exports.register = async (req, res) => {
         let { name, email, password, role } = req.body;
 
         // ✅ FIX: normalize role
-        role = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-
+        role = role ? role.toLowerCase() : "farmer";
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
