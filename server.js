@@ -8,9 +8,9 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const complianceRoutes = require("./routes/complianceRoutes");
 
-const app = express(); // ✅ FIRST create app
+const app = express(); // ✅ FIRST DEFINE APP
 
-// ✅ CORS
+// CORS
 app.use(cors({
     origin: "*",
     credentials: true
@@ -18,12 +18,12 @@ app.use(cors({
 
 app.use(express.json());
 
-// ✅ ROUTES (AFTER app)
+// ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
-app.use("/api/compliance", complianceRoutes); // ✅ NOW CORRECT
+app.use("/api/compliance", complianceRoutes); // ✅ NOW SAFE
 
-// DATABASE
+// DB
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch((err) => console.log(err));
