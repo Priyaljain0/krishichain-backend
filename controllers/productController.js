@@ -1,7 +1,9 @@
+const axios = require("axios");
 const Product = require("../models/Product");
 const QRCode = require("qrcode");
 const generateHash = require("../utils/hash");
 
+// ================= CREATE PRODUCT =================
 // ================= CREATE PRODUCT =================
 exports.createProduct = async (req, res) => {
     try {
@@ -13,6 +15,21 @@ exports.createProduct = async (req, res) => {
             expiryDate
         } = req.body;
 
+        // 🔥 STEP 1: CALL COMPLIANCE API
+        const complianceRes = await axios.post(
+            "https://krishichain-backend-production-be2c.up.railway.app/api/compliance/check",
+            { productName }
+        );
+
+        // 🔥 BLOCK IF BANNED
+        if (complianceRes.data.banned) {
+            return res.status(403).json({
+                success: false,
+                message: "❌ Product blocked by Compliance API"
+            });
+        }
+
+        // 🔥 STEP 2: CONTINUE NORMAL FLOW
         const productId = "PROD-" + Date.now();
 
         const firstBlock = {
@@ -54,10 +71,7 @@ exports.createProduct = async (req, res) => {
             message: error.message
         });
     }
-};
-
-
-// ================= GET SINGLE PRODUCT =================
+};// ================= GET SINGLE PRODUCT =================
 exports.getProduct = async (req, res) => {
     try {
         const product = await Product.findOne({

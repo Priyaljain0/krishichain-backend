@@ -6,10 +6,11 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
+const complianceRoutes = require("./routes/complianceRoutes");
 
-const app = express();
+const app = express(); // ✅ FIRST create app
 
-// ✅ CORS FIX (mobile issue solved)
+// ✅ CORS
 app.use(cors({
     origin: "*",
     credentials: true
@@ -17,16 +18,17 @@ app.use(cors({
 
 app.use(express.json());
 
-// ROUTES
+// ✅ ROUTES (AFTER app)
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/compliance", complianceRoutes); // ✅ NOW CORRECT
 
-// DATABASE CONNECTION
+// DATABASE
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
 .catch((err) => console.log(err));
 
-// TEST ROUTE
+// TEST
 app.get("/", (req, res) => {
     res.send("Backend Running");
 });
